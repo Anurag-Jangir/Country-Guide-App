@@ -10,7 +10,7 @@
 
 As this whole project revolves around fetching API. Now in JavaScript there are actually multiple ways of doing AJAX calls. And as a JavaScript developer we should know all the methods to fetch API i.e. from old school way to latest way.
 
-1. The very first method is using **XMLHttpRequest**:
+1. The very first method is using **`XMLHttpRequest`**:
 
 ```
 const xhrRequest = new XMLHttpRequest();
@@ -38,4 +38,69 @@ const xhrRequest = new XMLHttpRequest();
 
 > **Explanation** : Here in XMLHttpRequest we have to register a callback on the request object for the load event. So here we basically send off the request. So that request then fetches the data in the background. And then once that is done, it will emit the load event. And so using this **event-listener**, we are waiting for that event. And so as soon as the data arrives, this callback function will be called.
 
-> After that here we have sequence of AJAX calls, so that the second one runs only after the first one has finished. So by doing this, we have one callback inside another callback i.e. (nested callbacks). Now, imagine if we have callbacks inside of callbacks inside of callbacks, like 10 times. And for that kind of behaviour we have special name **CALLBACK HELL**
+> After that here we have sequence of AJAX calls, so that the second one runs only after the first one has finished. So by doing this, we have one callback inside another callback i.e. (nested callbacks). Now, imagine if we have callbacks inside of callbacks inside of callbacks, like 10 times. And for that kind of behaviour we have special name **CALLBACK HELL**. Which makes the code very difficult to understand and maintain. We have **promises** to deal with "callback hell". 
+
+2. The second method is using **`Fetch API`**:
+```
+fetch(`https://restcountries.com/v3.1/name/${country}`)
+  .then(response => {
+    console.log(response);
+    return response.json();
+  })
+  .then(data => {
+    console.log(data[0]);
+  });
+```
+> Fetch method always returns a **Promise** and a promise is either **fulfilled** or **rejected**.  
+> `Promise is object that is used basically as a placeholder for the future result of an asynchronous operation.` or  
+> `A promise is like a container for an asynchronously delivered value.` or even less formal  
+> `A promise is a container for a future value.`  
+
+![image](https://user-images.githubusercontent.com/89689615/207294618-576bc2e7-a7b8-4dc6-88b2-5705861c7a86.png)
+
+Promises have two stages **Promise Building** and **Promise Consuming**. Fetch() method will return a promise and the promise will be in pending state but at certain point the promise will be then **settled** and either in a `fulfilled` state or `rejected` state. Suppose promise is fulfilled and now we have a value to work with we will use `.then()` method to handle promise.
+#### `Response.json()` is also an asynchronous function which also returns another promise.  
+<hr>
+
+## Chaining Promises & Handling Errors:
+```
+//----------------------- Driver Code -----------------------
+
+// function to get JSON from api
+const getJSON = function (url, errorMsg) {
+  return fetch(url).then(response => {
+    console.log(response); // console response
+    if (!response.ok) throw new Error(`${errorMsg} (${response.status})`);
+    return response.json();
+  });
+};
+
+// get country data
+const getCountryData = function (country) {
+  getJSON(`https://restcountries.com/v3.1/name/${country}`, 'Country not found')
+    .then(data => {
+      console.log(data[0]);
+      renderCountry(data[0]);
+
+      // Neighbours country
+      if (!data[0].hasOwnProperty('borders'))
+        throw new Error(`Neighbour Country not found!`);
+      const [neighbour] = data[0].borders;
+      return getJSON(
+        `https://restcountries.com/v3.1/alpha/${neighbour}`,
+        'Country not found'
+      );
+    })
+    .then(data => {
+      console.log(data[0]);
+      renderCountry(data[0], 'neighbour');
+    })
+    .catch(err => {
+      console.error(`${err} 💥💥💥`);
+      renderError(`Something went wrong ❌ ${err.message}`);
+    })
+    .finally(() => {
+      countriesContainer.style.opacity = 1;
+    });
+};
+```
