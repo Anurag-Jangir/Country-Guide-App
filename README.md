@@ -104,3 +104,14 @@ const getCountryData = function (country) {
     });
 };
 ```
+
+
+<hr>
+
+
+# Summary 
+  - > In the project we can get our current location simply based on the **Geolocation** of our device. I have used Geolocation API `navigation.geolocation.getCurrentPosition(position, err)` which gave the **co-ordinates** of the location, and after getting **co-ordinates** (latitude & longitude) of current location I did **Reverse-Geocoding**  
+  - > "**Reverse-Geocoding** is a process used to convert coordinates (latitude and longitude) to human-readable addresses."  
+  I used `https://geocode.xyz/` (Geocode.xyz) API to basically reverse geocode coordinates. Reverse Geocoding gave me the **country** that those coordinates belong to and then based on that country, I could get all the data about the country using `Rest Countries` API.   
+  - > I have implemented a search bar 🔍 in this website so that we can search any country.  
+  When a country is searched in search bar we will also get the information of its **neighbour country** along with the searched one. And I have used nested fetch() methods to implement this functionality. 
